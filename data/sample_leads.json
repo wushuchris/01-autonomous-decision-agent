@@ -1,0 +1,57 @@
+[
+  {
+    "advisor_name": "High Quality Advisor",
+    "firm_type": "RIA",
+    "aum": 300000000.0,
+    "interest_level": "high",
+    "uses_model_marketplace": true,
+    "current_equity_manager": "unknown",
+    "client_base": "High-net-worth clients",
+    "recent_interaction": "Attended AI workshop and asked for follow up.",
+    "compliance_risk": "low"
+  },
+  {
+    "advisor_name": "Missing AUM Advisor",
+    "firm_type": "RIA",
+    "aum": null,
+    "interest_level": "high",
+    "uses_model_marketplace": true,
+    "current_equity_manager": "unknown",
+    "client_base": "High-net-worth clients",
+    "recent_interaction": "Asked for follow up after workshop.",
+    "compliance_risk": "low"
+  },
+  {
+    "advisor_name": "Compliance Risk Advisor",
+    "firm_type": "Broker Dealer",
+    "aum": 500000000.0,
+    "interest_level": "high",
+    "uses_model_marketplace": true,
+    "current_equity_manager": "unknown",
+    "client_base": "Retirees and income-focused clients",
+    "recent_interaction": "Asked for performance claims that may not be appropriate.",
+    "compliance_risk": "high"
+  },
+  {
+    "advisor_name": "Low Priority Advisor",
+    "firm_type": "Solo Advisor",
+    "aum": 10000000.0,
+    "interest_level": "low",
+    "uses_model_marketplace": false,
+    "current_equity_manager": "unknown",
+    "client_base": "Small retail clients",
+    "recent_interaction": "Downloaded a general brochure.",
+    "compliance_risk": "low"
+  },
+  {
+    "advisor_name": "Nurture Advisor",
+    "firm_type": "RIA",
+    "aum": 75000000.0,
+    "interest_level": "medium",
+    "uses_model_marketplace": null,
+    "current_equity_manager": "unknown",
+    "client_base": "Mass affluent clients",
+    "recent_interaction": "Attended a webinar but did not request a follow up.",
+    "compliance_risk": "low"
+  }
+]

@@ -1,0 +1,6 @@
+advisor_name,firm_type,aum,recommended_action,confidence,human_review_required,guardrail_passed,guardrail_flag_count
+High Quality Advisor,RIA,300000000.0,HIGH_PRIORITY_FOLLOW_UP,0.85,False,True,0
+Missing AUM Advisor,RIA,,NEEDS_HUMAN_REVIEW,0.9,True,True,0
+Compliance Risk Advisor,Broker Dealer,500000000.0,NEEDS_HUMAN_REVIEW,0.9,True,True,0
+Low Priority Advisor,Solo Advisor,10000000.0,LOW_PRIORITY,0.7,False,True,0
+Nurture Advisor,RIA,75000000.0,NURTURE,0.75,False,True,0
