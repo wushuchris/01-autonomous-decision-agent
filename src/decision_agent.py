@@ -1,5 +1,3 @@
-# Code developed using ChatGPT (ChatGPT, 2026) as a paired programmer.
-
 from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
 
