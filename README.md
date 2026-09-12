@@ -126,6 +126,15 @@ No real prospects, clients, advisor lists, firm strategy, or business-developmen
 
 The upgraded project adds deterministic pytest coverage, a synthetic decision benchmark, public-repository hygiene checks, and a GitHub Actions production gate. Hugging Face deployment is allowed only after software tests and evaluation pass.
 
+Current production validation on the sanitized public tree:
+
+- **18 automated tests passed**
+- **7/7 deterministic evaluation cases passed**
+- all five synthetic scenarios produced their expected bounded actions
+- unsafe explanation text was rejected and replaced with a deterministic fallback
+- action-changing explanation text was rejected without changing the application-selected action
+- public-repository hygiene checks passed
+
 ## Public-Demo Safety Boundary
 
 - All demo data is fictional and synthetic.
@@ -134,6 +143,7 @@ The upgraded project adds deterministic pytest coverage, a synthetic decision be
 - API keys and tokens are never stored in source.
 - The private curriculum and private planning material are not part of the public demo corpus, tests, screenshots, or deployment artifacts.
 - Repository hygiene tests scan tracked public text for private-source markers and common secret patterns.
+- The current public branch begins from a sanitized root commit rather than the original notebook-era history.
 
 ## Local Setup
 
