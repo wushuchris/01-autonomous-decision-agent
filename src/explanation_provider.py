@@ -8,7 +8,6 @@ from openai import OpenAI
 from src.decision_agent import DecisionOutput, EnterpriseOpportunity
 
 
-DEFAULT_MODEL = "Qwen/Qwen2.5-7B-Instruct"
 DEFAULT_BASE_URL = "https://router.huggingface.co/v1"
 
 
@@ -18,28 +17,44 @@ class HuggingFaceExplanationProvider:
     def __init__(
         self,
         token: Optional[str] = None,
-        model: Optional[str] = None,
+        model_id: Optional[str] = None,
+        base_url: Optional[str] = None,
         client: Optional[Any] = None,
     ) -> None:
-        self.token = token or os.getenv("HF_TOKEN")
-        self.model = model or os.getenv("HF_EXPLANATION_MODEL") or DEFAULT_MODEL
+        self.token = (token or os.getenv("HF_TOKEN") or "").strip()
+        self.model_id = (model_id or os.getenv("MODEL_ID") or "").strip()
+        self.base_url = (base_url or os.getenv("HF_BASE_URL") or DEFAULT_BASE_URL).strip()
         self._client = client
 
     @property
     def configured(self) -> bool:
-        return bool(self.token or self._client)
+        return bool(self._client or (self.token and self.model_id))
+
+    @property
+    def configuration_issue(self) -> Optional[str]:
+        if self._client is not None:
+            return None
+        missing = []
+        if not self.token:
+            missing.append("HF_TOKEN secret")
+        if not self.model_id:
+            missing.append("MODEL_ID variable")
+        if missing:
+            return "Missing " + " and ".join(missing) + "."
+        return None
 
     @property
     def provider_label(self) -> str:
-        return f"{self.model} via Hugging Face Inference Providers"
+        model = self.model_id or "MODEL_ID not configured"
+        return f"{model} via Hugging Face Inference Providers"
 
     def _get_client(self):
         if self._client is not None:
             return self._client
-        if not self.token:
-            raise RuntimeError("HF_TOKEN is not configured for LLM explanations.")
+        if self.configuration_issue:
+            raise RuntimeError(self.configuration_issue)
         return OpenAI(
-            base_url=DEFAULT_BASE_URL,
+            base_url=self.base_url,
             api_key=self.token,
             timeout=30.0,
         )
@@ -49,6 +64,9 @@ class HuggingFaceExplanationProvider:
         opportunity: EnterpriseOpportunity,
         decision: DecisionOutput,
     ) -> str:
+        if not self.model_id:
+            raise RuntimeError("MODEL_ID is not configured for LLM explanations.")
+
         client = self._get_client()
 
         prompt = f"""
@@ -68,7 +86,7 @@ Use only facts contained in the supplied opportunity and application decision.
 """.strip()
 
         response = client.chat.completions.create(
-            model=self.model,
+            model=self.model_id,
             messages=[
                 {
                     "role": "system",
