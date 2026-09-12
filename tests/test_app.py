@@ -29,10 +29,16 @@ def test_dropdown_and_action_labels_have_explicit_light_contrast():
 
 
 def test_llm_explanation_is_the_default_live_mode():
-    assert app.llm_toggle.value is True
+    assert app.explanation_mode.value == app.LLM_MODE
     provider = app.HuggingFaceExplanationProvider(token="test")
     assert "Hugging Face Inference Providers" in provider.provider_label
     assert app.DEFAULT_MODEL in provider.provider_label
+
+
+def test_explanation_mode_status_is_explicit():
+    assert "LLM ON" in app.explanation_mode_status(app.LLM_MODE)
+    assert app.DEFAULT_MODEL in app.explanation_mode_status(app.LLM_MODE)
+    assert "LLM OFF" in app.explanation_mode_status(app.DETERMINISTIC_MODE)
 
 
 def test_default_scenario_preview_is_explicitly_synthetic():
@@ -42,7 +48,7 @@ def test_default_scenario_preview_is_explicitly_synthetic():
 
 
 def test_stream_decision_exposes_real_runtime_stages():
-    frames = list(app.stream_decision("Northstar Systems", False))
+    frames = list(app.stream_decision("Northstar Systems", app.DETERMINISTIC_MODE))
     assert len(frames) == 7
     assert "RUNNING" in frames[0][0]
     combined = "".join(frame[0] for frame in frames)
@@ -56,6 +62,6 @@ def test_stream_decision_exposes_real_runtime_stages():
 
 
 def test_human_review_story_visibly_overrides_score():
-    frames = list(app.stream_decision("Atlas Civic Network", False))
+    frames = list(app.stream_decision("Atlas Civic Network", app.DETERMINISTIC_MODE))
     assert "NEEDS_HUMAN_REVIEW" in frames[-1][1]
     assert "High policy risk" in frames[-1][1]
