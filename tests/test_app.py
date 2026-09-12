@@ -30,15 +30,27 @@ def test_dropdown_and_action_labels_have_explicit_light_contrast():
 
 def test_llm_explanation_is_the_default_live_mode():
     assert app.explanation_mode.value == app.LLM_MODE
-    provider = app.HuggingFaceExplanationProvider(token="test")
-    assert "Hugging Face Inference Providers" in provider.provider_label
-    assert app.DEFAULT_MODEL in provider.provider_label
 
 
-def test_explanation_mode_status_is_explicit():
-    assert "LLM ON" in app.explanation_mode_status(app.LLM_MODE)
-    assert app.DEFAULT_MODEL in app.explanation_mode_status(app.LLM_MODE)
+def test_explanation_mode_status_is_explicit(monkeypatch):
+    monkeypatch.setenv("HF_TOKEN", "test")
+    monkeypatch.setenv("MODEL_ID", "synthetic/model-for-tests")
+
+    llm_status = app.explanation_mode_status(app.LLM_MODE)
+
+    assert "LLM ON" in llm_status
+    assert "synthetic/model-for-tests" in llm_status
     assert "LLM OFF" in app.explanation_mode_status(app.DETERMINISTIC_MODE)
+
+
+def test_explanation_mode_reports_incomplete_runtime(monkeypatch):
+    monkeypatch.delenv("HF_TOKEN", raising=False)
+    monkeypatch.delenv("MODEL_ID", raising=False)
+
+    status = app.explanation_mode_status(app.LLM_MODE)
+
+    assert "configuration incomplete" in status
+    assert "MODEL_ID" in status
 
 
 def test_default_scenario_preview_is_explicitly_synthetic():
