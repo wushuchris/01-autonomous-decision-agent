@@ -19,6 +19,15 @@ def test_tab_navigation_has_explicit_light_states():
     assert "background: #eef2ff" in app.APP_CSS
 
 
+def test_dropdown_and_action_labels_have_explicit_light_contrast():
+    assert '[role="listbox"]' in app.APP_CSS
+    assert '[role="option"]' in app.APP_CSS
+    assert '#scenario-picker input' in app.APP_CSS
+    assert '.gradio-container code' in app.APP_CSS
+    assert '-webkit-text-fill-color: #0f172a' in app.APP_CSS
+    assert '-webkit-text-fill-color: #312e81' in app.APP_CSS
+
+
 def test_default_scenario_preview_is_explicitly_synthetic():
     preview = app.scenario_summary("Northstar Systems")
     assert "Synthetic scenario" in preview
