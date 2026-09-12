@@ -30,8 +30,9 @@ def test_dropdown_and_action_labels_have_explicit_light_contrast():
 
 def test_llm_explanation_is_the_default_live_mode():
     assert app.llm_toggle.value is True
-    assert "Hugging Face Inference Providers" in app.HuggingFaceExplanationProvider(token="synthetic-test-token").provider_label
-    assert app.DEFAULT_MODEL in app.HuggingFaceExplanationProvider(token="synthetic-test-token").provider_label
+    provider = app.HuggingFaceExplanationProvider(token="test")
+    assert "Hugging Face Inference Providers" in provider.provider_label
+    assert app.DEFAULT_MODEL in provider.provider_label
 
 
 def test_default_scenario_preview_is_explicitly_synthetic():
