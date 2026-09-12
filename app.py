@@ -21,7 +21,7 @@ from src.decision_agent import (
     generate_business_explanation,
     run_decision_iter,
 )
-from src.explanation_provider import HuggingFaceExplanationProvider
+from src.explanation_provider import DEFAULT_MODEL, HuggingFaceExplanationProvider
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -65,14 +65,16 @@ def scenario_summary(name: str) -> str:
 
 def _explanation_builder(use_llm: bool, mode_state: dict[str, str]):
     if not use_llm:
-        mode_state["status"] = "Deterministic explanation mode. The bounded action is unchanged."
+        mode_state["status"] = (
+            "Deterministic explanation mode. Application code selected the bounded action and no model call was made."
+        )
         return generate_business_explanation
 
     provider = HuggingFaceExplanationProvider()
     if not provider.configured:
         mode_state["status"] = (
-            "LLM explanation was requested, but HF_TOKEN is not configured. "
-            "The deterministic explanation fallback is being used."
+            "LLM explanation was requested, but HF_TOKEN is not configured in this Space. "
+            "The deterministic explanation fallback is being used; the bounded action is unchanged."
         )
         return generate_business_explanation
 
@@ -80,13 +82,14 @@ def _explanation_builder(use_llm: bool, mode_state: dict[str, str]):
         try:
             explanation = provider(opportunity, decision)
             mode_state["status"] = (
-                "LLM-assisted explanation mode. Application code still owns the action and publication guardrail."
+                f"LLM-assisted explanation via {provider.provider_label}. "
+                "Application code still owns the action, score, review gate, and publication guardrail."
             )
             return explanation
         except Exception:
             mode_state["status"] = (
-                "The optional LLM provider was unavailable, so the deterministic explanation fallback was used. "
-                "The bounded action was unaffected."
+                f"The LLM provider ({provider.provider_label}) was unavailable, so the deterministic explanation "
+                "fallback was used. The bounded action was unaffected."
             )
             return generate_business_explanation(opportunity, decision)
 
@@ -154,9 +157,13 @@ with gr.Blocks(
     )
 
     llm_toggle = gr.Checkbox(
-        label="Use optional LLM-assisted explanation when HF_TOKEN is configured",
-        value=False,
+        label="Use LLM-assisted explanation (safe deterministic fallback if unavailable)",
+        value=True,
         elem_id="llm-toggle",
+    )
+    gr.Markdown(
+        f"**Explanation model:** `{DEFAULT_MODEL}` via Hugging Face Inference Providers. "
+        "The model receives the already-selected action; it never receives decision authority."
     )
     run_button = gr.Button(
         "Run bounded decision",
@@ -186,7 +193,7 @@ with gr.Blocks(
 
         with gr.Tab("Guardrail Boundary"):
             gr.Markdown(
-                "The explanation must preserve the application-selected action and avoid prohibited promises or unauthorized commitments. If it fails, a deterministic fallback is published instead."
+                "The LLM produces only a candidate explanation. It must preserve the application-selected action and avoid prohibited promises or unauthorized commitments. If it fails, a deterministic fallback is published instead."
             )
             guardrail_output = gr.HTML(render_guardrail(None))
 
@@ -197,7 +204,9 @@ with gr.Blocks(
 
 **Application authority:** validate structured input, score approved factors, enforce mandatory review, select one action from the fixed action set, and decide whether an explanation may be published.
 
-**Optional model authority:** explain the action after it has already been selected. The model receives no authority to change the action, threshold, score, or human-review requirement.
+**LLM authority:** explain the action after it has already been selected. The model receives no authority to change the action, threshold, score, or human-review requirement.
+
+**Publication boundary:** every model-generated candidate explanation is checked by application guardrails. A failed candidate is discarded and replaced by a deterministic explanation.
 
 ### Fixed action set
 
@@ -212,7 +221,7 @@ All opportunity records are fictional synthetic data. The public app does not pe
 
 ### Reusable primitive
 
-**Validate → Score → Review gate → Select bounded action → Explain → Guardrail → Publish**
+**Validate → Score → Review gate → Select bounded action → LLM explain → Guardrail → Publish**
 
 This primitive becomes the portfolio baseline for later planning, memory, tool-use, workflow, and multi-agent systems where application code must retain authority over consequential actions.
 """
