@@ -3,8 +3,11 @@ from types import SimpleNamespace
 import pytest
 
 from src.decision_agent import decide_action
-from src.explanation_provider import DEFAULT_MODEL, HuggingFaceExplanationProvider
+from src.explanation_provider import DEFAULT_BASE_URL, HuggingFaceExplanationProvider
 import app
+
+
+TEST_MODEL = "synthetic/model-for-tests"
 
 
 class FakeCompletions:
@@ -31,13 +34,38 @@ def test_provider_can_use_injected_client_without_secret():
     client = FakeClient(
         "Northstar Systems is assigned PRIORITIZE because the approved factors produced a strong bounded score."
     )
-    provider = HuggingFaceExplanationProvider(client=client)
+    provider = HuggingFaceExplanationProvider(model_id=TEST_MODEL, client=client)
 
     explanation = provider(opportunity, decision)
 
     assert provider.configured is True
     assert "PRIORITIZE" in explanation
-    assert client.completions.last_kwargs["model"] == DEFAULT_MODEL
+    assert client.completions.last_kwargs["model"] == TEST_MODEL
+
+
+def test_provider_reads_space_runtime_variables(monkeypatch):
+    monkeypatch.setenv("HF_TOKEN", "test")
+    monkeypatch.setenv("MODEL_ID", TEST_MODEL)
+    monkeypatch.setenv("HF_BASE_URL", "https://example.invalid/v1")
+
+    provider = HuggingFaceExplanationProvider()
+
+    assert provider.configured is True
+    assert provider.model_id == TEST_MODEL
+    assert provider.base_url == "https://example.invalid/v1"
+    assert TEST_MODEL in provider.provider_label
+
+
+def test_provider_reports_missing_runtime_configuration(monkeypatch):
+    monkeypatch.delenv("HF_TOKEN", raising=False)
+    monkeypatch.delenv("MODEL_ID", raising=False)
+
+    provider = HuggingFaceExplanationProvider()
+
+    assert provider.configured is False
+    assert "HF_TOKEN secret" in provider.configuration_issue
+    assert "MODEL_ID variable" in provider.configuration_issue
+    assert provider.base_url == DEFAULT_BASE_URL
 
 
 def test_provider_prompt_preserves_application_authority():
@@ -46,7 +74,7 @@ def test_provider_prompt_preserves_application_authority():
     client = FakeClient(
         "Atlas Civic Network is assigned NEEDS_HUMAN_REVIEW because the application review gate requires it."
     )
-    provider = HuggingFaceExplanationProvider(client=client)
+    provider = HuggingFaceExplanationProvider(model_id=TEST_MODEL, client=client)
 
     provider(opportunity, decision)
 
@@ -59,15 +87,18 @@ def test_provider_prompt_preserves_application_authority():
 
 
 def test_provider_label_discloses_model_and_hugging_face():
-    provider = HuggingFaceExplanationProvider(token="test")
-    assert DEFAULT_MODEL in provider.provider_label
+    provider = HuggingFaceExplanationProvider(token="test", model_id=TEST_MODEL)
+    assert TEST_MODEL in provider.provider_label
     assert "Hugging Face Inference Providers" in provider.provider_label
 
 
 def test_provider_rejects_empty_response():
     opportunity = app.load_scenarios()["Juniper Works"]
     decision = decide_action(opportunity)
-    provider = HuggingFaceExplanationProvider(client=FakeClient("   "))
+    provider = HuggingFaceExplanationProvider(
+        model_id=TEST_MODEL,
+        client=FakeClient("   "),
+    )
 
     with pytest.raises(RuntimeError, match="empty response"):
         provider(opportunity, decision)
