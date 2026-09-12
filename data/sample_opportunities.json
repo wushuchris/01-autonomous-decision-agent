@@ -1,0 +1,52 @@
+[
+  {
+    "opportunity_name": "Northstar Systems",
+    "organization_type": "enterprise",
+    "annual_contract_potential": 650000,
+    "strategic_fit": "high",
+    "engagement_level": "high",
+    "integration_ready": true,
+    "recent_interaction": "Requested demo and asked for proposal.",
+    "policy_risk": "low"
+  },
+  {
+    "opportunity_name": "Juniper Works",
+    "organization_type": "mid_market",
+    "annual_contract_potential": 120000,
+    "strategic_fit": "medium",
+    "engagement_level": "medium",
+    "integration_ready": null,
+    "recent_interaction": "Attended a product briefing.",
+    "policy_risk": "low"
+  },
+  {
+    "opportunity_name": "Cedar Ridge Labs",
+    "organization_type": "startup",
+    "annual_contract_potential": 25000,
+    "strategic_fit": "low",
+    "engagement_level": "low",
+    "integration_ready": false,
+    "recent_interaction": "Downloaded a public brochure.",
+    "policy_risk": "low"
+  },
+  {
+    "opportunity_name": "Atlas Civic Network",
+    "organization_type": "public_sector",
+    "annual_contract_potential": 800000,
+    "strategic_fit": "high",
+    "engagement_level": "high",
+    "integration_ready": true,
+    "recent_interaction": "Requested demo and requested follow-up.",
+    "policy_risk": "high"
+  },
+  {
+    "opportunity_name": "Blue Harbor Group",
+    "organization_type": "enterprise",
+    "annual_contract_potential": null,
+    "strategic_fit": "high",
+    "engagement_level": "high",
+    "integration_ready": true,
+    "recent_interaction": "Asked for proposal.",
+    "policy_risk": "low"
+  }
+]

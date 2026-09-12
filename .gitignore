@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Runtime outputs
+outputs/
+
+# Secrets and local environments
+.env
+.envrc
+.venv/
+env/
+venv/
+ENV/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.hypothesis/
+.ruff_cache/
+.mypy_cache/
+
+# Jupyter / Colab local artifacts
+.ipynb_checkpoints/
+
+# IDE / local tooling
+.vscode/
+.idea/
+tempCodeRunnerFile.py
+
+# Streamlit local secrets
+.streamlit/secrets.toml
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# OS files
+.DS_Store
