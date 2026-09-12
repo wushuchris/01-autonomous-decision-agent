@@ -21,7 +21,7 @@ from src.decision_agent import (
     generate_business_explanation,
     run_decision_iter,
 )
-from src.explanation_provider import DEFAULT_MODEL, HuggingFaceExplanationProvider
+from src.explanation_provider import HuggingFaceExplanationProvider
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -65,6 +65,12 @@ def scenario_summary(name: str) -> str:
     )
 
 
+def _provider_error_summary(exc: Exception) -> str:
+    status_code = getattr(exc, "status_code", None)
+    status = f"HTTP {status_code}" if status_code else exc.__class__.__name__
+    return status
+
+
 def _explanation_builder(use_llm: bool, mode_state: dict[str, str]):
     if not use_llm:
         mode_state["status"] = (
@@ -74,8 +80,9 @@ def _explanation_builder(use_llm: bool, mode_state: dict[str, str]):
 
     provider = HuggingFaceExplanationProvider()
     if not provider.configured:
+        issue = provider.configuration_issue or "LLM runtime is not configured."
         mode_state["status"] = (
-            "LLM explanation was requested, but HF_TOKEN is not configured in this Space. "
+            f"LLM explanation was requested, but the Space runtime is not ready: {issue} "
             "The deterministic explanation fallback is being used; the bounded action is unchanged."
         )
         return generate_business_explanation
@@ -88,9 +95,10 @@ def _explanation_builder(use_llm: bool, mode_state: dict[str, str]):
                 "Application code still owns the action, score, review gate, and publication guardrail."
             )
             return explanation
-        except Exception:
+        except Exception as exc:
+            diagnostic = _provider_error_summary(exc)
             mode_state["status"] = (
-                f"The LLM provider ({provider.provider_label}) was unavailable, so the deterministic explanation "
+                f"The LLM provider ({provider.provider_label}) returned {diagnostic}, so the deterministic explanation "
                 "fallback was used. The bounded action was unaffected."
             )
             return generate_business_explanation(opportunity, decision)
@@ -100,9 +108,16 @@ def _explanation_builder(use_llm: bool, mode_state: dict[str, str]):
 
 def explanation_mode_status(mode: str) -> str:
     if mode == LLM_MODE:
+        provider = HuggingFaceExplanationProvider()
+        if provider.configured:
+            return (
+                f"**Current mode: LLM ON** — `{provider.model_id}` via Hugging Face Inference Providers. "
+                "The model explains the already-selected action; application code retains decision authority."
+            )
+        issue = provider.configuration_issue or "LLM runtime is not configured."
         return (
-            f"**Current mode: LLM ON** — `{DEFAULT_MODEL}` via Hugging Face Inference Providers. "
-            "The model explains the already-selected action; application code retains decision authority."
+            f"**Current mode: LLM ON, runtime configuration incomplete** — {issue} "
+            "Add the missing Hugging Face Space configuration or use deterministic mode."
         )
     return (
         "**Current mode: LLM OFF** — deterministic explanation only. "
@@ -225,6 +240,8 @@ with gr.Blocks(
 **Application authority:** validate structured input, score approved factors, enforce mandatory review, select one action from the fixed action set, and decide whether an explanation may be published.
 
 **LLM authority:** explain the action after it has already been selected. The model receives no authority to change the action, threshold, score, or human-review requirement.
+
+**Runtime configuration:** the Hugging Face Space supplies `HF_TOKEN` as a secret, `MODEL_ID` as a variable, and optionally `HF_BASE_URL` as a variable. Model selection is deployment configuration, not decision policy.
 
 **Publication boundary:** every model-generated candidate explanation is checked by application guardrails. A failed candidate is discarded and replaced by a deterministic explanation.
 
