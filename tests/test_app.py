@@ -28,6 +28,12 @@ def test_dropdown_and_action_labels_have_explicit_light_contrast():
     assert '-webkit-text-fill-color: #312e81' in app.APP_CSS
 
 
+def test_llm_explanation_is_the_default_live_mode():
+    assert app.llm_toggle.value is True
+    assert "Hugging Face Inference Providers" in app.HuggingFaceExplanationProvider(token="synthetic-test-token").provider_label
+    assert app.DEFAULT_MODEL in app.HuggingFaceExplanationProvider(token="synthetic-test-token").provider_label
+
+
 def test_default_scenario_preview_is_explicitly_synthetic():
     preview = app.scenario_summary("Northstar Systems")
     assert "Synthetic scenario" in preview
