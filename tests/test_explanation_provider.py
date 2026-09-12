@@ -59,7 +59,7 @@ def test_provider_prompt_preserves_application_authority():
 
 
 def test_provider_label_discloses_model_and_hugging_face():
-    provider = HuggingFaceExplanationProvider(token="synthetic-test-token")
+    provider = HuggingFaceExplanationProvider(token="test")
     assert DEFAULT_MODEL in provider.provider_label
     assert "Hugging Face Inference Providers" in provider.provider_label
 
