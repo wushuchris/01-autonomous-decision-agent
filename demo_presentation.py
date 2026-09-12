@@ -57,6 +57,42 @@ APP_CSS = """
 .boundary-card ul { margin: 8px 0 0 20px; padding: 0; }
 .section-title, .section-title h2 { color: #0f172a !important; }
 #scenario-picker, #llm-toggle { background: #ffffff !important; border: 1px solid #dbe3ee !important; border-radius: 14px !important; padding: 12px 14px !important; }
+#scenario-picker label, #scenario-picker label span, #scenario-picker .block-info, #scenario-picker .block-label, #scenario-picker .label-wrap {
+    color: #334155 !important;
+    -webkit-text-fill-color: #334155 !important;
+    opacity: 1 !important;
+    font-weight: 750 !important;
+}
+#scenario-picker input, #scenario-picker button, #scenario-picker .wrap, #scenario-picker [data-testid="dropdown"] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+[role="listbox"] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 14px 30px rgba(15,23,42,.14) !important;
+}
+[role="listbox"] [role="option"], [role="option"] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+[role="listbox"] [role="option"]:hover, [role="option"]:hover,
+[role="listbox"] [role="option"][aria-selected="true"], [role="option"][aria-selected="true"] {
+    background: #eef2ff !important;
+    color: #312e81 !important;
+    -webkit-text-fill-color: #312e81 !important;
+}
+.gradio-container code {
+    background: #eef2ff !important;
+    color: #312e81 !important;
+    -webkit-text-fill-color: #312e81 !important;
+    border: 1px solid #c7d2fe !important;
+    border-radius: 6px !important;
+    padding: 2px 6px !important;
+}
 #run-decision { background: #4f46e5 !important; border: 1px solid #4f46e5 !important; color: #ffffff !important; border-radius: 12px !important; min-height: 48px !important; font-weight: 800 !important; }
 #run-decision:hover { background: #4338ca !important; border-color: #4338ca !important; }
 .activity-card { padding: 20px; min-height: 118px; border-radius: 18px; margin-top: 10px; }
