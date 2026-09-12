@@ -26,6 +26,8 @@ from src.explanation_provider import DEFAULT_MODEL, HuggingFaceExplanationProvid
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_FILE = PROJECT_ROOT / "data" / "sample_opportunities.json"
+LLM_MODE = "LLM-assisted explanation"
+DETERMINISTIC_MODE = "Deterministic explanation"
 
 
 @lru_cache(maxsize=1)
@@ -96,10 +98,23 @@ def _explanation_builder(use_llm: bool, mode_state: dict[str, str]):
     return builder
 
 
-def stream_decision(scenario_name: str, use_llm: bool):
+def explanation_mode_status(mode: str) -> str:
+    if mode == LLM_MODE:
+        return (
+            f"**Current mode: LLM ON** — `{DEFAULT_MODEL}` via Hugging Face Inference Providers. "
+            "The model explains the already-selected action; application code retains decision authority."
+        )
+    return (
+        "**Current mode: LLM OFF** — deterministic explanation only. "
+        "Application code still uses the same bounded decision policy."
+    )
+
+
+def stream_decision(scenario_name: str, explanation_mode: str):
     opportunity = load_scenarios()[scenario_name]
     mode_state: dict[str, str] = {}
-    builder = _explanation_builder(bool(use_llm), mode_state)
+    use_llm = explanation_mode == LLM_MODE
+    builder = _explanation_builder(use_llm, mode_state)
     events = []
 
     for event, result in run_decision_iter(
@@ -156,14 +171,19 @@ with gr.Blocks(
         show_progress="hidden",
     )
 
-    llm_toggle = gr.Checkbox(
-        label="Use LLM-assisted explanation (safe deterministic fallback if unavailable)",
-        value=True,
-        elem_id="llm-toggle",
+    explanation_mode = gr.Dropdown(
+        choices=[LLM_MODE, DETERMINISTIC_MODE],
+        value=LLM_MODE,
+        label="Explanation mode",
+        elem_id="explanation-mode",
+        interactive=True,
     )
-    gr.Markdown(
-        f"**Explanation model:** `{DEFAULT_MODEL}` via Hugging Face Inference Providers. "
-        "The model receives the already-selected action; it never receives decision authority."
+    mode_selection_status = gr.Markdown(explanation_mode_status(LLM_MODE))
+    explanation_mode.change(
+        fn=explanation_mode_status,
+        inputs=explanation_mode,
+        outputs=mode_selection_status,
+        show_progress="hidden",
     )
     run_button = gr.Button(
         "Run bounded decision",
@@ -229,7 +249,7 @@ This primitive becomes the portfolio baseline for later planning, memory, tool-u
 
     run_button.click(
         fn=stream_decision,
-        inputs=[scenario_input, llm_toggle],
+        inputs=[scenario_input, explanation_mode],
         outputs=[
             activity_output,
             outcome_output,
